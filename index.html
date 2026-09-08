@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nimbus Store — Demo</title>
+<link rel="stylesheet" href="styles.css">
+<script>
+  // Auth guard (simulated) — avoids a flash of protected content.
+  if (sessionStorage.getItem("nimbus_auth") !== "true") {
+    window.location.href = "login.html";
+  }
+</script>
+</head>
+<body data-testid="store-body">
+
+<header class="site-header" id="siteHeader" data-testid="site-header">
+  <div class="container header-inner">
+    <a href="index.html" class="logo" id="logo" data-testid="logo">Nimbus<span>Store</span></a>
+
+    <div class="search-wrap">
+      <input
+        type="text"
+        id="searchInput"
+        name="search"
+        data-testid="search-input"
+        placeholder="Search products...">
+    </div>
+
+    <nav class="cat-nav" id="catNav" data-testid="category-nav">
+      <button class="cat-btn active" id="catBtnAll" data-cat="all" data-testid="category-all">All</button>
+      <button class="cat-btn" id="catBtnClothing" data-cat="clothing" data-testid="category-clothing">Clothing</button>
+      <button class="cat-btn" id="catBtnElectronics" data-cat="electronics" data-testid="category-electronics">Electronics</button>
+      <button class="cat-btn" id="catBtnHome" data-cat="home" data-testid="category-home">Home</button>
+      <button class="cat-btn" id="catBtnSports" data-cat="sports" data-testid="category-sports">Sports</button>
+      <button class="cat-btn" id="catBtnFruits" data-cat="fruits" data-testid="category-fruits">Fruits</button>
+      <button class="cat-btn" id="catBtnGroceries" data-cat="groceries" data-testid="category-groceries">Groceries</button>
+      <button class="cat-btn" id="catBtnMisc" data-cat="misc" data-testid="category-misc">Miscellaneous</button>
+    </nav>
+
+    <span class="welcome-msg" id="welcomeMsg" data-testid="welcome-message" hidden></span>
+
+    <button class="cart-btn" id="openCart" data-testid="cart-open-button">
+      🛒 <span id="cartCount" data-testid="cart-count">0</span>
+    </button>
+
+    <button class="icon-btn logout-btn" id="logoutBtn" data-testid="logout-button" title="Log out">Log out</button>
+  </div>
+</header>
+
+<main class="container">
+  <section class="hero" id="hero" data-testid="hero-section">
+    <h1>Everything you need, in one place</h1>
+    <p>Demo store — fictional products, simulated checkout.</p>
+  </section>
+
+  <section id="productGrid" class="product-grid" data-testid="product-grid"></section>
+  <p id="emptyState" class="empty-state" data-testid="empty-state" hidden>No products found.</p>
+</main>
+
+<footer class="site-footer" id="siteFooter" data-testid="site-footer">
+  <div class="container">
+    <p>Nimbus Store — demo site. No real payment is processed.</p>
+  </div>
+</footer>
+
+<!-- Cart Drawer -->
+<div id="cartOverlay" class="overlay" data-testid="cart-overlay" hidden></div>
+<aside id="cartDrawer" class="cart-drawer" data-testid="cart-drawer" hidden>
+  <div class="cart-header">
+    <h2>Your Cart</h2>
+    <button id="closeCart" class="icon-btn" data-testid="cart-close-button" aria-label="Close">✕</button>
+  </div>
+  <div id="cartItems" class="cart-items" data-testid="cart-items"></div>
+  <div class="cart-footer">
+    <div class="cart-total-row">
+      <span>Subtotal</span>
+      <strong id="cartSubtotal" data-testid="cart-subtotal">$0.00</strong>
+    </div>
+    <button id="checkoutBtn" class="btn btn-primary btn-block" data-testid="cart-checkout-button" disabled>Checkout</button>
+  </div>
+</aside>
+
+<!-- Checkout Modal -->
+<div id="checkoutOverlay" class="overlay" data-testid="checkout-overlay" hidden></div>
+<div id="checkoutModal" class="checkout-modal" data-testid="checkout-modal" hidden>
+  <button id="closeCheckout" class="icon-btn modal-close" data-testid="checkout-close-button" aria-label="Close">✕</button>
+
+  <div id="checkoutStepForm" class="checkout-step" data-testid="checkout-step-form">
+    <h2>Checkout</h2>
+    <div class="checkout-layout">
+      <form id="checkoutForm" name="checkoutForm" class="checkout-form" data-testid="checkout-form">
+        <h3>Shipping details</h3>
+        <div class="form-row">
+          <label for="checkoutFullname">Full name
+            <input type="text" id="checkoutFullname" name="fullname" data-testid="checkout-fullname-input" required placeholder="Jane Doe">
+          </label>
+        </div>
+        <div class="form-row">
+          <label for="checkoutEmail">Email
+            <input type="email" id="checkoutEmail" name="email" data-testid="checkout-email-input" required placeholder="jane@example.com">
+          </label>
+        </div>
+        <div class="form-row">
+          <label for="checkoutAddress">Address
+            <input type="text" id="checkoutAddress" name="address" data-testid="checkout-address-input" required placeholder="123 Main St">
+          </label>
+        </div>
+        <div class="form-row form-row-split">
+          <label for="checkoutCity">City
+            <input type="text" id="checkoutCity" name="city" data-testid="checkout-city-input" required placeholder="City">
+          </label>
+          <label for="checkoutZip">ZIP code
+            <input type="text" id="checkoutZip" name="zip" data-testid="checkout-zip-input" required placeholder="00000">
+          </label>
+        </div>
+
+        <h3>Payment <span class="demo-tag">simulated — no real money is charged</span></h3>
+        <div class="form-row">
+          <label for="checkoutCard">Card number
+            <input type="text" id="checkoutCard" name="card" data-testid="checkout-card-input" required placeholder="4242 4242 4242 4242" maxlength="19" autocomplete="off">
+          </label>
+        </div>
+        <div class="form-row form-row-split">
+          <label for="checkoutExpiry">Expiry
+            <input type="text" id="checkoutExpiry" name="expiry" data-testid="checkout-expiry-input" required placeholder="MM/YY" maxlength="5" autocomplete="off">
+          </label>
+          <label for="checkoutCvc">CVC
+            <input type="text" id="checkoutCvc" name="cvc" data-testid="checkout-cvc-input" required placeholder="123" maxlength="4" autocomplete="off">
+          </label>
+        </div>
+
+        <button type="submit" id="checkoutSubmit" class="btn btn-primary btn-block" data-testid="checkout-submit-button">Confirm order (demo)</button>
+      </form>
+
+      <div class="order-summary" data-testid="order-summary">
+        <h3>Order summary</h3>
+        <div id="summaryItems" class="summary-items" data-testid="summary-items"></div>
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <span id="sumSubtotal" data-testid="summary-subtotal">$0.00</span>
+        </div>
+        <div class="summary-row">
+          <span>Shipping</span>
+          <span id="sumShipping" data-testid="summary-shipping">$0.00</span>
+        </div>
+        <div class="summary-row total">
+          <span>Total</span>
+          <span id="sumTotal" data-testid="summary-total">$0.00</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="checkoutStepSuccess" class="checkout-step" data-testid="checkout-step-success" hidden>
+    <div class="success-box">
+      <div class="success-icon">✓</div>
+      <h2>Order confirmed!</h2>
+      <p>Thank you <strong id="successName" data-testid="success-name">​</strong>, your test order
+        <strong id="successOrderId" data-testid="success-order-id">​</strong> has been placed.</p>
+      <p class="muted">This is a demo: no real charge was made.</p>
+      <button id="continueShopping" class="btn btn-primary" data-testid="continue-shopping-button">Continue shopping</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast" data-testid="toast" hidden></div>
+
+<script src="products.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
